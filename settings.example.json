@@ -1,0 +1,23 @@
+{
+    "awskey": "YOUR_AWS_KEY",
+    "awssecret": "YOUR_AWS_SECRET",
+    "libratoEmail": "foo@example.com",
+    "libratoToken": "YOUR_LIBRATO_METRICS_TOKEN",
+    "instanceNameTag": "AWS_EC2_KEY_TO_USE_FOR_METRIC_SOURCE",
+    "metrics": [ 
+        {
+            "MetricName": "CPUUtilization",
+            "Namespace": "AWS/EC2",
+            "Unit": "Percent",
+            "Period": 60,
+            "Statistic": "Average"
+        },
+        {
+            "MetricName": "MY_CUSTOM_METRIC",
+            "Namespace": "System/Linux",
+            "Unit": "Count",
+            "Period": 60,
+            "Statistic": "Average"
+        } 
+    ]
+}
