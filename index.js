@@ -32,8 +32,6 @@ if (!options.awskey ||
     process.exit(1);
 }
 
-var cw = aws.createCWClient(options.awskey, options.awssecret,
-    {host: 'monitoring.' + options.region + '.amazonaws.com'});
 var ec2 = aws.createEC2Client(options.awskey, options.awssecret,
     {host: 'ec2.' + options.region + '.amazonaws.com', version: '2012-03-01'});
 
@@ -56,15 +54,17 @@ Step(
         else if (result && result.Error)
           throw JSON.stringify(result.Error);
         if (!result.tagSet.item) return '';
-        else return result.tagSet.item.key === 'Name' ? result.tagSet.item.value : '';
+        else return result.tagSet.item.key === options.instanceNameTag ? result.tagSet.item.value : '';
     },
     function(err, name) {
         if (err) throw err;
         options.name = name;
         var Metrics = require('./lib/Metrics.js')(options);
-        _(options.metrics).each(function(metric) {
-            var reporter = new Metrics(metric);
+        var batches = _(options.metrics).groupBy(function(metric) {
+            return parseInt(metric.Period, 10);
+        });
+        _(batches).each(function(batch) {
+            var reporter = new Metrics(batch);
         });
     }
 );
-
