@@ -1,4 +1,6 @@
 var fs = require('fs');
+var path = require('path');
+var exec = require('child_process').exec;
 var Step = require('step');
 var aws = require('aws-lib');
 var _ = require('underscore');
@@ -32,39 +34,105 @@ if (!options.awskey ||
     process.exit(1);
 }
 
-var ec2 = aws.createEC2Client(options.awskey, options.awssecret,
-    {host: 'ec2.' + options.region + '.amazonaws.com', version: '2012-03-01'});
+// TODO: determine regions from what's in options.metrics
+var regions = ['us-east-1', 'eu-west-1'];
+var instanceMap = [];
+var tags = {};
+
+options.regions = regions;
+
+var clients = {};
+_(regions).each(function(region) {
+    clients[region] = aws.createEC2Client(options.awskey, options.awssecret, 
+      {version: '2012-03-01', host: 'ec2.' + region + '.amazonaws.com'});
+});
 
 Step(
     function() {
-        exec('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id', this);
+        // Get this machines's instanceId and region
+        //exec('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id', this);
+        return 'i-11112222';
     },
-    function(err, instanceId) {
-        options.instanceId = instanceId;
+    function(err, stdout, stderr) {
         if (err) throw err;
-        ec2.call('DescribeTags', {
-            'Filter.1.Name': 'resource-id',
-            'Filter.1.Value': instanceId,
-            'Filter.2.Name': 'key',
-            'Filter.2.Value': options.instanceNameTag
-        }, this);
+        // Get this machine's region
+        //exec('wget -q -O - http://169.254.169.254/latest/meta-data/placement/availability-zone', this);
+        return {instanceId: stdout.split('\n'), region: 'us-east-1'};
     },
-    function(err, result) {
+    function(err, metadata, stderr) {
         if (err) throw err;
-        else if (result && result.Error)
-          throw JSON.stringify(result.Error);
-        if (!result.tagSet.item) return '';
-        else return result.tagSet.item.key === options.instanceNameTag ? result.tagSet.item.value : '';
+        var group = this.group();
+        // Resolve instance-id and region for _self
+        _(options.metrics).each(function(metric, i) {
+            if (metric.Instances === '_self') {
+                options.metrics[i].Instances = {};
+                options.metrics[i].Instances[metadata.region] = [];
+                exec(path.join(__dirname, './self '), group());
+            } else {
+                for (k in metric.Instances) {
+                    if (metric.Instances[k] === "_callback") {
+                        exec(path.join(__dirname, './getInstances ') + k, group());
+                    }
+                };
+            }
+        });
     },
-    function(err, name) {
+    // Get list of tags for all regions
+    function(err, stdout, stderr) {
         if (err) throw err;
-        options.name = name;
+        _(stdout).each(function(string) {
+            instanceMap.push(string.replace('\n', '').split(' '));
+        });
+        getTags(this);
+    },
+    function(err, res) {
+        if (err) throw err;
+        _(regions).each(function(region, i) {
+            tags[region] = Array.isArray(res[i].tagSet.item) ?
+              res[i].tagSet.item : [res[i].tagSet.item];
+        });
+        var z = 0;
+        _(options.metrics).each(function(metric, i) {
+            for (region in metric.Instances) {
+                options.metrics[i].Instances[region] = [];
+                _(instanceMap[z]).each(function(instance) {
+                    var name = _(tags[region]).find(function(tag) {
+                        return tag.resourceId === instance;
+                    });
+                    options.metrics[i].Instances[region].push({
+                        instanceId: instance, 
+                        name: name ? (name.value).replace(/(-|\s)/g,'_') : ''}); 
+                });
+                z++;
+            }
+        });
+
         var Metrics = require('./lib/Metrics.js')(options);
         var batches = _(options.metrics).groupBy(function(metric) {
             return parseInt(metric.Period, 10);
         });
         _(batches).each(function(batch) {
             var reporter = new Metrics(batch);
-        });
+        }); 
     }
 );
+
+function getTags(cb) {
+    Step(
+        function() {
+            var group = this.group();
+            _(regions).each(function(region) {
+                clients[region].call('DescribeTags', {
+                    'Filter.1.Name': 'key',
+                    'Filter.1.Value': options.instanceNameTag,
+                    'Filter.2.Name': 'resource-type',
+                    'Filter.2.Value': 'instance'
+                }, group());
+            });
+        },
+        function(err, tags) {
+            if (err) throw err;
+            cb(err, tags);
+        }
+    );
+}
