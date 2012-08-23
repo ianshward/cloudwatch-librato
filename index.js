@@ -64,16 +64,16 @@ Step(
         var group = this.group();
         // Resolve instance-id and region for _self
         _(options.metrics).each(function(metric, i) {
-            if (metric.Instances === '_self') {
-                options.metrics[i].Instances = {};
-                options.metrics[i].Instances[metadata.region] = [];
+            if (metric.Dimensions === '_self') {
+                options.metrics[i].Dimensions = {};
+                options.metrics[i].Dimensions[metadata.region] = '';
                 exec(path.join(__dirname, './self '), group());
             } else {
-                for (k in metric.Instances) {
-                    if (metric.Instances[k] === "_callback") {
-                        exec(path.join(__dirname, './getInstances ') + k, group());
+                for (region in metric.Dimensions) {
+                    if (metric.Dimensions[region] === "_callback") {
+                        exec(path.join(__dirname, './getInstances ') + region, group());
                     }
-                };
+                }
             }
         });
     },
@@ -93,17 +93,19 @@ Step(
         });
         var z = 0;
         _(options.metrics).each(function(metric, i) {
-            for (region in metric.Instances) {
-                options.metrics[i].Instances[region] = [];
-                _(instanceMap[z]).each(function(instance) {
-                    var name = _(tags[region]).find(function(tag) {
-                        return tag.resourceId === instance;
+            for (region in metric.Dimensions) {
+                if (!Array.isArray(options.metrics[i].Dimensions[region])) {
+                    options.metrics[i].Dimensions[region] = [];
+                    _(instanceMap[z]).each(function(instance) {
+                        var name = _(tags[region]).find(function(tag) {
+                            return tag.resourceId === instance;
+                        });
+                        if (name) name = (name.value).replace(/(-|\s)/g,'_');
+                        else name = '';
+                        options.metrics[i].Dimensions[region].push([instance, name]);
                     });
-                    options.metrics[i].Instances[region].push({
-                        instanceId: instance, 
-                        name: name ? (name.value).replace(/(-|\s)/g,'_') : ''}); 
-                });
-                z++;
+                    z++;
+                }
             }
         });
 
@@ -111,6 +113,7 @@ Step(
         var batches = _(options.metrics).groupBy(function(metric) {
             return parseInt(metric.Period, 10);
         });
+
         _(batches).each(function(batch) {
             var reporter = new Metrics(batch);
         }); 
