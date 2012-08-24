@@ -2,7 +2,12 @@
 
 cloudwatch-librato allows you to query your [Amazon CloudWatch](http://aws.amazon.com/cloudwatch/) metrics and submit them to [Librato Metrics](https://metrics.librato.com/). Librato Metrics has powerful metric correlation, metric drilldown, and custom dashboards features which let you view related metrics together in the same graph or on the same custom dashboard.  If you have metrics in more than one AWS region it is easy to view them side by side within Librato Metrics.
 
-### Setup
+### Installation
+
+- add your aws key, aws secret, librato email, and librato token to settings.json
+- if you use _self or _callback, you must create `./getInstances` and `./self` scripts which live in the same directory as index.js.  See below for more details about _self and _callback.
+- fill out which metrics you would like to proxy in settings.example.json
+- when setup is complete, run like `node ./index.js --config settings.example.json`
 
 cloudwatch-librato runs as a daemon.  A configuration file holds AWS and Librato API credentials as well as definitions of which metrics to fetch from CloudWatch and send to Librato.  There are four ways you can specify "Dimensions" for a metric:
 
