@@ -38,8 +38,7 @@ if (!options.awskey ||
 Step(
     function() {
         // Get this machine's region
-        //exec('wget -q -O - http://169.254.169.254/latest/meta-data/placement/availability-zone', this);
-        return 'us-east-1a';
+        exec('wget -q -O - http://169.254.169.254/latest/meta-data/placement/availability-zone', this);
     },
     function(err, stdout, stderr) {
         if (err) throw err;
