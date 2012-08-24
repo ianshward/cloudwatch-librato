@@ -52,14 +52,14 @@ cloudwatch-librato runs as a daemon.  A configuration file holds AWS and Librato
 **This instance**
 
 ```json
-      {
-            "MetricName": "NetworkOut",
-            "Namespace": "AWS/EC2",
-            "Unit": "Bytes",
-            "Period": 300,
-            "Statistic": "Average",
-            "Dimensions": "_self"
-        },
+{
+    "MetricName": "NetworkOut",
+    "Namespace": "AWS/EC2",
+    "Unit": "Bytes",
+    "Period": 300,
+    "Statistic": "Average",
+    "Dimensions": "_self"
+}
 ```
 
 - use of _self will cause a file called ./self to be executed.  The output of ./self should return an instanceId, like `i-abcd1234`. The idea is the instance where the daemon is running will be used as the source, so you could create the ./self file and set its contents to:
