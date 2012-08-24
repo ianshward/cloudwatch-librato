@@ -37,24 +37,18 @@ if (!options.awskey ||
 
 Step(
     function() {
-        // Get this machines's instanceId and region
-        //exec('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id', this);
-        return 'i-11112222';
+        // Get this machine's region
+        //exec('wget -q -O - http://169.254.169.254/latest/meta-data/placement/availability-zone', this);
+        return 'us-east-1a';
     },
     function(err, stdout, stderr) {
         if (err) throw err;
-        // Get this machine's region
-        //exec('wget -q -O - http://169.254.169.254/latest/meta-data/placement/availability-zone', this);
-        return {instanceId: stdout.split('\n'), region: 'us-east-1'};
-    },
-    function(err, metadata, stderr) {
-        if (err) throw err;
+        var region = stdout.slice(0,-1);
         var group = this.group();
-        // Resolve instance-id and region for _self
         _(options.metrics).each(function(metric, i) {
             if (metric.Dimensions === '_self') {
                 options.metrics[i].Dimensions = {};
-                options.metrics[i].Dimensions[metadata.region] = '';
+                options.metrics[i].Dimensions[region] = '';
                 exec(path.join(__dirname, './self '), group());
             } else {
                 for (region in metric.Dimensions) {
