@@ -37,7 +37,6 @@ if (!options.awskey ||
 // TODO: determine regions from what's in options.metrics
 var regions = ['us-east-1', 'eu-west-1'];
 var instanceMap = [];
-var tags = {};
 
 options.regions = regions;
 
@@ -87,6 +86,7 @@ Step(
     },
     function(err, res) {
         if (err) throw err;
+        var tags = {};
         _(regions).each(function(region, i) {
             tags[region] = Array.isArray(res[i].tagSet.item) ?
               res[i].tagSet.item : [res[i].tagSet.item];
