@@ -71,3 +71,7 @@ wget -q -O - http://169.254.169.254/latest/meta-data/instance-id
 ```
 
 See settings.example.json for more examples.
+
+**Other values in settings.example.json**
+
+* **instanceNameTag** if you use the ec2 "tags" feature and one of your tags refers to a name you've given that ec2, you can set the value of this key to the name of that tag, which will give your metrics friendlier names within Librato Metrics.

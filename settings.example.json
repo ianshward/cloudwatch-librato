@@ -1,23 +1,101 @@
 {
     "awskey": "YOUR_AWS_KEY",
     "awssecret": "YOUR_AWS_SECRET",
-    "libratoEmail": "foo@example.com",
+    "libratoEmail": "you@example.com",
     "libratoToken": "YOUR_LIBRATO_METRICS_TOKEN",
-    "instanceNameTag": "AWS_EC2_KEY_TO_USE_FOR_METRIC_SOURCE",
+    "instanceNameTag": "Name",
     "metrics": [ 
+        {
+            "MetricName": "RequestCount",
+            "Namespace": "AWS/ELB",
+            "Unit": "Count",
+            "Period": 60,
+            "Statistic": "Sum",
+            "Dimensions": {
+                "us-east-1": [
+                                 ["LoadBalancerName", "my-ui-elb", "VA_UI_ELB"],
+                                 ["LoadBalancerName", "my-api-elb", "VA_API_ELB"]
+                             ],
+                "eu-west-1": [
+                                 ["LoadBalancerName", "my-ui-elb", "IRL_UI_ELB"],
+                                 ["LoadBalancerName", "my-api-elb", "IRL_API_ELB"]
+                             ]
+            }
+        },
+        {
+            "MetricName": "HTTPCode_Backend_5XX",
+            "Namespace": "AWS/ELB",
+            "Unit": "Count",
+            "Period": 60,
+            "Statistic": "Sum",
+            "Dimensions": {
+                "us-east-1": [
+                                 ["LoadBalancerName", "my-ui-elb", "VA_UI_ELB"],
+                                 ["LoadBalancerName", "my-api-elb", "VA_API_ELB"]
+                             ],
+                "eu-west-1": [
+                                 ["LoadBalancerName", "my-ui-elb", "IRL_UI_ELB"],
+                                 ["LoadBalancerName", "my-api-elb", "IRL_API_ELB"]
+                             ]
+            }
+        },
+        {
+            "MetricName": "Latency",
+            "Namespace": "AWS/ELB",
+            "Unit": "Count",
+            "Period": 60,
+            "Statistic": "Sum",
+            "Dimensions": {
+                "us-east-1": [
+                                 ["LoadBalancerName", "my-ui-elb", "VA_UI_ELB"],
+                                 ["LoadBalancerName", "my-api-elb", "VA_API_ELB"]
+                             ],
+                "eu-west-1": [
+                                 ["LoadBalancerName", "my-ui-elb", "IRL_UI_ELB"],
+                                 ["LoadBalancerName", "my-api-elb", "IRL_API_ELB"]
+                             ]
+            }
+        },
         {
             "MetricName": "CPUUtilization",
             "Namespace": "AWS/EC2",
             "Unit": "Percent",
             "Period": 60,
-            "Statistic": "Average"
+            "Statistic": "Average",
+            "Dimensions": {
+                "us-east-1": "_callback",
+                "eu-west-1": "_callback"
+            }
         },
         {
-            "MetricName": "MY_CUSTOM_METRIC",
+            "MetricName": "MemoryPercentUsed",
+            "Namespace": "System/Linux",
+            "Unit": "Percent",
+            "Period": 60,
+            "Statistic": "Average",
+            "Dimensions": {
+                "us-east-1": "_callback",
+                "eu-west-1": "_callback"
+            }
+        },
+        {
+            "MetricName": "NetworkOut",
+            "Namespace": "AWS/EC2",
+            "Unit": "Bytes",
+            "Period": 300,
+            "Statistic": "Average",
+            "Dimensions": "_self"
+        },
+        {
+            "MetricName": "LoadAverageMinute",
             "Namespace": "System/Linux",
             "Unit": "Count",
             "Period": 60,
-            "Statistic": "Average"
+            "Statistic": "Average",
+            "Dimensions": {
+                "us-east-1": "_callback",
+                "eu-west-1": "_callback"
+            }
         } 
     ]
 }
