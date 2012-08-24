@@ -72,7 +72,7 @@ cloudwatch-librato runs as a daemon.  A configuration file holds AWS and Librato
 ```bash
 #!/bin/bash
 
-wget -q -O - http://169.254.169.254/latest/meta-data/instance-id
+echo wget -q -O - http://169.254.169.254/latest/meta-data/instance-id
 ```
 
 See settings.example.json for more examples.
