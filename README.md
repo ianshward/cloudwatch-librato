@@ -7,7 +7,7 @@ cloudwatch-librato allows you to query your [Amazon CloudWatch](http://aws.amazo
 - add your aws key, aws secret, librato email, and librato token to settings.json
 - if you use _self or _callback, you must create `./getInstances` and `./self` scripts which live in the same directory as index.js.  See below for more details about _self and _callback.
 - fill out which metrics you would like to proxy in settings.example.json
-- when setup is complete, run like `node ./index.js --config settings.example.json`
+- when setup is complete, run like `node ./index.js --config settings.example.json` or `/usr/bin/cloudwatch-librato --config settings.example.json`
 
 cloudwatch-librato runs as a daemon.  A configuration file holds AWS and Librato API credentials as well as definitions of which metrics to fetch from CloudWatch and send to Librato.  There are four ways you can specify "Dimensions" for a metric:
 
