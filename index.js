@@ -36,7 +36,6 @@ if (!options.awskey ||
 
 // TODO: determine regions from what's in options.metrics
 var regions = ['us-east-1', 'eu-west-1'];
-var instanceMap = [];
 
 options.regions = regions;
 
@@ -76,47 +75,47 @@ Step(
             }
         });
     },
-    // Get list of tags for all regions
     function(err, stdout, stderr) {
         if (err) throw err;
+        var tags = {};
+        var instanceMap = [];    
         _(stdout).each(function(string) {
             instanceMap.push(string.replace('\n', '').split(' '));
         });
-        getTags(this);
-    },
-    function(err, res) {
-        if (err) throw err;
-        var tags = {};
-        _(regions).each(function(region, i) {
-            tags[region] = Array.isArray(res[i].tagSet.item) ?
-              res[i].tagSet.item : [res[i].tagSet.item];
-        });
-        var z = 0;
-        _(options.metrics).each(function(metric, i) {
-            for (region in metric.Dimensions) {
-                if (!Array.isArray(options.metrics[i].Dimensions[region])) {
-                    options.metrics[i].Dimensions[region] = [];
-                    _(instanceMap[z]).each(function(instance) {
-                        var name = _(tags[region]).find(function(tag) {
-                            return tag.resourceId === instance;
+        getTags(function(err, res) {
+            if (err) throw err;
+            _(regions).each(function(region, i) {
+                tags[region] = Array.isArray(res[i].tagSet.item) ?
+                  res[i].tagSet.item : [res[i].tagSet.item];
+            });
+            // Index of instanceMap, which differs from number of metrics due to
+            // not all metrics are instance-centric, such as ELB request count
+            var z = 0;
+            _(options.metrics).each(function(metric, i) {
+                for (region in metric.Dimensions) {
+                    if (!Array.isArray(options.metrics[i].Dimensions[region])) {
+                        options.metrics[i].Dimensions[region] = [];
+                        _(instanceMap[z]).each(function(instance) {
+                            var name = _(tags[region]).find(function(tag) {
+                                return tag.resourceId === instance;
+                            });
+                            if (name) name = (name.value).replace(/(-|\s)/g,'_');
+                            else name = '';
+                            options.metrics[i].Dimensions[region].push([instance, name]);
                         });
-                        if (name) name = (name.value).replace(/(-|\s)/g,'_');
-                        else name = '';
-                        options.metrics[i].Dimensions[region].push([instance, name]);
-                    });
-                    z++;
+                        z++;
+                    }
                 }
-            }
+            });
+            var Metrics = require('./lib/Metrics.js')(options);
+            // Batch by metric period to consolidate requests made to Librato API
+            var batches = _(options.metrics).groupBy(function(metric) {
+                return parseInt(metric.Period, 10);
+            });
+            _(batches).each(function(batch) {
+                var reporter = new Metrics(batch);
+            }); 
         });
-
-        var Metrics = require('./lib/Metrics.js')(options);
-        var batches = _(options.metrics).groupBy(function(metric) {
-            return parseInt(metric.Period, 10);
-        });
-
-        _(batches).each(function(batch) {
-            var reporter = new Metrics(batch);
-        }); 
     }
 );
 
