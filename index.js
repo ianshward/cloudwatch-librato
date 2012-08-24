@@ -34,16 +34,6 @@ if (!options.awskey ||
     process.exit(1);
 }
 
-// TODO: determine regions from what's in options.metrics
-var regions = ['us-east-1', 'eu-west-1'];
-
-options.regions = regions;
-
-var clients = {};
-_(regions).each(function(region) {
-    clients[region] = aws.createEC2Client(options.awskey, options.awssecret, 
-      {version: '2012-03-01', host: 'ec2.' + region + '.amazonaws.com'});
-});
 
 Step(
     function() {
@@ -82,7 +72,18 @@ Step(
         _(stdout).each(function(string) {
             instanceMap.push(string.replace('\n', '').split(' '));
         });
-        getTags(function(err, res) {
+        // Get list of referenced regions
+        var regions = _(options.metrics).chain()
+            .map(function(metric) {
+                return _(metric.Dimensions).keys()
+            })
+            .flatten()
+            .unique()
+            .value();
+        // Set regions in options
+        options.regions = regions;
+        // Try to get human name of dimension, like the instance name, from ec2 tags API
+        getTags(regions, function(err, res) {
             if (err) throw err;
             _(regions).each(function(region, i) {
                 tags[region] = Array.isArray(res[i].tagSet.item) ?
@@ -119,7 +120,12 @@ Step(
     }
 );
 
-function getTags(cb) {
+function getTags(regions, cb) {
+    var clients = {};
+    _(regions).each(function(region) {
+        clients[region] = aws.createEC2Client(options.awskey, options.awssecret, 
+          {version: '2012-03-01', host: 'ec2.' + region + '.amazonaws.com'});
+    });
     Step(
         function() {
             var group = this.group();
