@@ -11,6 +11,7 @@ var optimist = require('optimist')
 .alias('region', 'r')
 .default('region', 'us-east-1');
 var argv = optimist.argv;
+process.title = 'cloudwatch-librato';
 var options = {};
 // Setup configuration options
 if (argv.config) {
