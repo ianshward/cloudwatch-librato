@@ -43,12 +43,12 @@ Step(
     },
     function(err, stdout, stderr) {
         if (err) throw err;
-        var region = stdout.slice(0,-1);
+        var thisRegion = stdout.slice(0,-1);
         var group = this.group();
         _(options.metrics).each(function(metric, i) {
             if (metric.Dimensions === '_self') {
                 options.metrics[i].Dimensions = {};
-                options.metrics[i].Dimensions[region] = '';
+                options.metrics[i].Dimensions[thisRegion] = '';
                 exec(path.join(__dirname, './self '), group());
             } else {
                 for (region in metric.Dimensions) {

@@ -1,8 +1,8 @@
 {
     "awskey": "YOUR_AWS_KEY",
     "awssecret": "YOUR_AWS_SECRET",
-    "libratoEmail": "you@example.com",
-    "libratoToken": "YOUR_LIBRATO_METRICS_TOKEN",
+    "libratoemail": "you@example.com",
+    "libratotoken": "YOUR_LIBRATO_METRICS_TOKEN",
     "instanceNameTag": "Name",
     "metrics": [ 
         {
