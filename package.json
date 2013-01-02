@@ -1,7 +1,7 @@
 {
   "name": "cloudwatch-librato",
   "description": "Send your CloudWatch metrics to Librato Metrics",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "repository": {
       "type": "git",
       "url": "git://github.com/ianshward/cloudwatch-librato.git"
@@ -14,7 +14,7 @@
   "dependencies": {
     "underscore": "1.1.x",
     "optimist": "0.3.x",
-    "aws-lib": "0.0.x",
+    "aws-lib": "0.1.5",
     "step": "0.0.x",
     "librato-metrics": "0.0.x"
   },
