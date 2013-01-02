@@ -29,13 +29,6 @@ _.each(argv, function(v, k) {
     options[k] = argv[k];
 });
 
-if (!options.awskey ||
-    !options.awssecret) {
-    console.log("Must provide all of awskey and awssecret as --config parameters")
-    process.exit(1);
-}
-
-
 Step(
     function() {
         // Get this machine's region
