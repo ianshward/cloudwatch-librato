@@ -1,7 +1,7 @@
 {
   "name": "cloudwatch-librato",
   "description": "Send your CloudWatch metrics to Librato Metrics",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "repository": {
       "type": "git",
       "url": "git://github.com/ianshward/cloudwatch-librato.git"
