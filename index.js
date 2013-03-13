@@ -87,8 +87,14 @@ Step(
                             var name = _(tags[region]).find(function(tag) {
                                 return tag.resourceId === instance;
                             });
-                            if (name) name = (name.value).replace(/(-|\s)/g,'_');
-                            else name = '';
+                            if (name) {
+                                name = (name.value + '-' + instance)
+                                  .replace(/(\s)/g,'-')
+                                  .replace(/-{2,}/g, '-');
+                            }
+                            else {
+                                name = instance;
+                            }
                             options.metrics[i].Dimensions[region].push([instance, name]);
                         });
                         z++;
